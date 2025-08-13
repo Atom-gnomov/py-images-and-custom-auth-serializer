@@ -139,7 +139,6 @@ class OrderListSerializer(OrderSerializer):
 
 
 class MovieImageSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Movie
         fields = ("id", "image")
