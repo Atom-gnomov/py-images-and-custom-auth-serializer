@@ -93,6 +93,7 @@ class MovieSessionListSerializer(MovieSessionSerializer):
                 if request
                 else obj.movie.image.url
             )
+
         return None
 
 
