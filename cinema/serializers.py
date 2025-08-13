@@ -33,7 +33,8 @@ class CinemaHallSerializer(serializers.ModelSerializer):
 class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
-        fields = ("id", "title", "description", "duration", "genres", "actors")
+        fields = ("id", "title", "description", "duration", "genres", "actors", "image")
+        read_only_fields = ("image",)
 
 
 class MovieListSerializer(MovieSerializer):
@@ -51,7 +52,7 @@ class MovieDetailSerializer(MovieSerializer):
 
     class Meta:
         model = Movie
-        fields = ("id", "title", "description", "duration", "genres", "actors")
+        fields = ("id", "title", "description", "duration", "genres", "actors", "image")
 
 
 class MovieSessionSerializer(serializers.ModelSerializer):
@@ -135,3 +136,10 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class OrderListSerializer(OrderSerializer):
     tickets = TicketListSerializer(many=True, read_only=True)
+
+
+class MovieImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Movie
+        fields = ("id", "image")
