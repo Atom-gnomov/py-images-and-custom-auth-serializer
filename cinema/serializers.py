@@ -52,7 +52,8 @@ class MovieDetailSerializer(MovieSerializer):
 
     class Meta:
         model = Movie
-        fields = ("id", "title", "description", "duration", "genres", "actors", "image")
+        fields = ("id", "title", "description", "duration", "genres", "actors")
+        read_only_fields = ("image",)
 
 
 class MovieSessionSerializer(serializers.ModelSerializer):
@@ -70,6 +71,7 @@ class MovieSessionListSerializer(MovieSessionSerializer):
         source="cinema_hall.capacity", read_only=True
     )
     tickets_available = serializers.IntegerField(read_only=True)
+    movie_image = serializers.SerializerMethodField()
 
     class Meta:
         model = MovieSession
@@ -80,7 +82,18 @@ class MovieSessionListSerializer(MovieSessionSerializer):
             "cinema_hall_name",
             "cinema_hall_capacity",
             "tickets_available",
+            "movie_image",
         )
+
+    def get_movie_image(self, obj):
+        request = self.context.get("request")
+        if obj.movie and obj.movie.image:
+            return (
+                request.build_absolute_uri(obj.movie.image.url)
+                if request
+                else obj.movie.image.url
+            )
+        return None
 
 
 class TicketSerializer(serializers.ModelSerializer):
@@ -142,3 +155,18 @@ class MovieImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         fields = ("id", "image")
+
+    def validate_image(self, value):
+
+        if not value.content_type.startswith("image/"):
+            raise serializers.ValidationError("Файл должен быть изображением (JPEG, PNG, GIF, WEBP).")
+
+
+        valid_extensions = ["jpg", "jpeg", "png", "gif", "webp"]
+        ext = value.name.split(".")[-1].lower()
+        if ext not in valid_extensions:
+            raise serializers.ValidationError(
+                f"Недопустимый формат файла: {ext}. Разрешены: {', '.join(valid_extensions)}"
+            )
+
+        return value
